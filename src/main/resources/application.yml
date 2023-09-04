@@ -1,16 +1,18 @@
 server:
   port: 9000
+
 spring:
   application:
     name: auth-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/auth?serverTimezone=Asia/Seoul
-    username: root
-    password: 1q2w3e4r!!
+  data:
+    mongodb:
+      uri: mongodb+srv://${env.MONGO_USER}:${env.MONGO_PASSWORD}@${env.MONGO_CLUSTER}
+
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: true
+
 jwt:
   secret: fewbiuebeot5324980hbhgsd0uub9gpkklnqbp4214989oub926t32be0gbdsn
 
