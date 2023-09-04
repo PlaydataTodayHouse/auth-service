@@ -19,5 +19,6 @@ public class SignupRequest {
     private String phoneNumber;
     private String email;
     private LocalDate birth;
+    private String profileImage;
     private String role;
 }

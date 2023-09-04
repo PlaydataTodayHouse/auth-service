@@ -1,16 +1,24 @@
 package com.example.auth.service;
 
+import com.example.auth.client.api.CustomerClient;
+import com.example.auth.client.api.OwnerClient;
+import com.example.auth.client.request.CustomerRequest;
 import com.example.auth.client.request.OwnerRequest;
 import com.example.auth.config.JwtService;
 import com.example.auth.domain.entity.Role;
 import com.example.auth.domain.entity.User;
+import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.SignupRequest;
+import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +33,12 @@ public class AuthService {
     public void signUp(SignupRequest request) {
         User user = User.builder()
                 .name(request.getName())
-                .phoneNumber(request.getPhoneNumber()) // "number"를 "phoneNumber"로 수정
+                .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
-                .birth(request.getBirth()) // 생년월일 추가
-                .role(Role.valueOf(request.getRole()))
+                .birth(request.getBirth())
+                .profileImage(request.getProfileImage())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.valueOf(request.getRole()))
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -37,12 +46,14 @@ public class AuthService {
         // 역할에 따라 서비스 호출
         if (savedUser.getRole() == Role.OWNER) {
             OwnerRequest ownerRequest = new OwnerRequest(
-                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber());
+                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
+                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
             ResponseEntity<Void> response = ownerClient.saveOwner(ownerRequest);
             checkServiceResponse(savedUser.getRole(), response);
         } else if (savedUser.getRole() == Role.CUSTOMER) {
             CustomerRequest customerRequest = new CustomerRequest(
-                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber());
+                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
+                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
             ResponseEntity<Void> response = customerClient.saveCustomer(customerRequest);
             checkServiceResponse(savedUser.getRole(), response);
         }

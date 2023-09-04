@@ -19,6 +19,7 @@ public class User {
     private String phoneNumber;
     private String email;
     private LocalDate birth;
+    private String profileImage;
 
     @Enumerated(EnumType.STRING)
     private Role role;
