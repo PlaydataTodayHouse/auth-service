@@ -26,6 +26,7 @@ public class JwtService {
         claims.put("phoneNumber", user.getPhoneNumber());
         claims.put("email", user.getEmail());
         claims.put("birth", user.getBirth());
+        claims.put("address", user.getAddress());
         claims.put("role", user.getRole().name());
 
         String token = Jwts.builder()

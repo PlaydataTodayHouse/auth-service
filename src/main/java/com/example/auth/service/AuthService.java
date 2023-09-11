@@ -10,6 +10,7 @@ import com.example.auth.domain.entity.User;
 import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
+import com.example.auth.domain.response.UserResponse;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,23 @@ public class AuthService {
         return new LoginResponse(token, user.getRole().name());
     }
 
+    // 아이디로 회원 정보 조회
+    public UserResponse findUserByUserId(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("USER NOT FOUND FOR USERID: " + userId));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .email(user.getEmail())
+                .birth(user.getBirth())
+                .profileImage(user.getProfileImage())
+                .role(user.getRole().name())
+                .build();
+    }
+
     // 서비스 호출 응답 검사 메서드
     private void checkServiceResponse(Role role, ResponseEntity<Void> response) {
         if (response.getStatusCode() != HttpStatus.CREATED) {
@@ -79,4 +97,7 @@ public class AuthService {
             throw new RuntimeException(err);
         }
     }
+
+
+
 }
