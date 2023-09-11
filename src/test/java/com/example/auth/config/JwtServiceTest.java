@@ -16,7 +16,7 @@ class JwtServiceTest {
     @Autowired
     JwtService jwtService;
     UUID uuid = UUID.randomUUID();
-    User dsa = User.builder().id(uuid).number("01").name("dsa").role(Role.CUSTOMER).build();
+    User dsa = User.builder().id(uuid).phoneNumber("01").name("dsa").role(Role.CUSTOMER).build();
     @Test
     void makeToken() {
 
@@ -27,11 +27,11 @@ class JwtServiceTest {
 
     @Test
     void parseToken() {
-        String token = jwtService.makeToken(dsa);
-        TokenInfo tokenInfo = jwtService.parseToken(token);
+        String token = jwtService.makeAccessToken(dsa);
+        TokenInfo tokenInfo = jwtService.parseAccessToken(token);
         Assertions.assertEquals(tokenInfo.getId(),uuid);
         Assertions.assertEquals(tokenInfo.getRole(),dsa.getRole().name());
-        Assertions.assertEquals(tokenInfo.getNumber(),dsa.getNumber());
+        Assertions.assertEquals(tokenInfo.getPhoneNumber(),dsa.getPhoneNumber());
         Assertions.assertEquals(tokenInfo.getName(),dsa.getName());
     }
 }

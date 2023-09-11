@@ -5,12 +5,14 @@ import com.example.auth.client.api.OwnerClient;
 import com.example.auth.client.request.CustomerRequest;
 import com.example.auth.client.request.OwnerRequest;
 import com.example.auth.config.JwtService;
+import com.example.auth.domain.entity.RefreshToken;
 import com.example.auth.domain.entity.Role;
 import com.example.auth.domain.entity.User;
 import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.domain.response.UserResponse;
+import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -29,6 +32,9 @@ public class AuthService {
     private final JwtService jwtService;
     private final OwnerClient ownerClient;
     private final CustomerClient customerClient;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+
 
     @Transactional
     public void signUp(SignupRequest request) {
@@ -69,9 +75,20 @@ public class AuthService {
             throw new IllegalArgumentException("INVALID PASSWORD");
         }
 
-        String token = jwtService.makeToken(user);
-        return new LoginResponse(token, user.getRole().name());
+        String accessToken = jwtService.makeAccessToken(user);
+        String refreshTokenString = jwtService.makeRefreshToken(user);
+
+        // 리프레시 토큰 저장
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUserId(Integer.parseInt(user.getUserId()));
+        refreshToken.setToken(refreshTokenString);
+        refreshToken.setExpiryDate(LocalDateTime.now().plusDays(3));
+        refreshTokenRepository.save(refreshToken);
+
+        return new LoginResponse(accessToken, refreshTokenString, user.getRole().name());
     }
+
+
 
     // 아이디로 회원 정보 조회
     public UserResponse findUserByUserId(String userId) {
