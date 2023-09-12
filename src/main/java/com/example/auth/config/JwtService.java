@@ -70,7 +70,7 @@ public class JwtService {
 
     public void saveRefreshToken(User user, String refreshToken) {
         RefreshToken newToken = new RefreshToken();
-        newToken.setUserId(Integer.parseInt(user.getUserId()));
+        newToken.setUserId((user.getUserId()));
         newToken.setToken(refreshToken);
         newToken.setExpiryDate(getRefreshTokenExpiryDate(refreshToken));
         refreshTokenRepository.save(newToken);

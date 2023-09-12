@@ -16,7 +16,7 @@ public class RefreshToken {
     private Integer id;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private String userId;
 
     private String token;
 

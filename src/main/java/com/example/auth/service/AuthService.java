@@ -1,7 +1,6 @@
 package com.example.auth.service;
 
-import com.example.auth.client.api.CustomerClient;
-import com.example.auth.client.api.OwnerClient;
+
 import com.example.auth.client.request.CustomerRequest;
 import com.example.auth.client.request.OwnerRequest;
 import com.example.auth.config.JwtService;
@@ -32,8 +31,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final OwnerClient ownerClient;
-    private final CustomerClient customerClient;
+//    private final OwnerClient ownerClient;
+//    private final CustomerClient customerClient;
     private final RefreshTokenRepository refreshTokenRepository;
 
 
@@ -41,6 +40,7 @@ public class AuthService {
     @Transactional
     public void signUp(SignupRequest request) {
         User user = User.builder()
+                .userId((request.getUserId()))
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
@@ -53,19 +53,19 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         // 역할에 따라 서비스 호출
-        if (savedUser.getRole() == Role.OWNER) {
-            OwnerRequest ownerRequest = new OwnerRequest(
-                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
-                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
-            ResponseEntity<Void> response = ownerClient.saveOwner(ownerRequest);
-            checkServiceResponse(savedUser.getRole(), response);
-        } else if (savedUser.getRole() == Role.CUSTOMER) {
-            CustomerRequest customerRequest = new CustomerRequest(
-                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
-                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
-            ResponseEntity<Void> response = customerClient.saveCustomer(customerRequest);
-            checkServiceResponse(savedUser.getRole(), response);
-        }
+//        if (savedUser.getRole() == Role.OWNER) {
+//            OwnerRequest ownerRequest = new OwnerRequest(
+//                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
+//                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
+//            ResponseEntity<Void> response = ownerClient.saveOwner(ownerRequest);
+//            checkServiceResponse(savedUser.getRole(), response);
+//        } else if (savedUser.getRole() == Role.CUSTOMER) {
+//            CustomerRequest customerRequest = new CustomerRequest(
+//                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
+//                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
+//            ResponseEntity<Void> response = customerClient.saveCustomer(customerRequest);
+//            checkServiceResponse(savedUser.getRole(), response);
+//        }
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -82,7 +82,7 @@ public class AuthService {
 
         // 리프레시 토큰 저장
         RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUserId(Integer.parseInt(user.getUserId()));
+        refreshToken.setUserId((user.getUserId()));
         refreshToken.setToken(refreshTokenString);
         jwtService.saveRefreshToken(user, refreshTokenString);
 

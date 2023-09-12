@@ -19,6 +19,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
+
+
+
+
+
     @Bean
     public SecurityFilterChain
         securityFilterChain(HttpSecurity security) throws Exception {
