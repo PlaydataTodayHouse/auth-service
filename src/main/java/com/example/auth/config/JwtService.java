@@ -32,7 +32,7 @@ public class JwtService {
     private RefreshTokenRepository refreshTokenRepository;
 
 
-    public String refreshToken(String refreshToken) {
+    public String generateNewAccessToken(String refreshToken) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secret.getBytes())
