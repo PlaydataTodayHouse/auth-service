@@ -12,6 +12,8 @@ import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.domain.response.UserResponse;
+import com.example.auth.exception.InvalidPasswordException;
+import com.example.auth.exception.UserNotFoundException;
 import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -69,10 +71,10 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         Optional<User> optionalUser = userRepository.findByUserId(request.getUserId());
         User user = optionalUser.orElseThrow(
-                () -> new IllegalArgumentException("USER NOT FOUND"));
+                () -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("INVALID PASSWORD");
+            throw new InvalidPasswordException("Invalid password");
         }
 
         String accessToken = jwtService.makeAccessToken(user);
@@ -82,11 +84,11 @@ public class AuthService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUserId(Integer.parseInt(user.getUserId()));
         refreshToken.setToken(refreshTokenString);
-        refreshToken.setExpiryDate(LocalDateTime.now().plusDays(3));
-        refreshTokenRepository.save(refreshToken);
+        jwtService.saveRefreshToken(user, refreshTokenString);
 
         return new LoginResponse(accessToken, refreshTokenString, user.getRole().name());
     }
+
 
 
 
@@ -114,7 +116,6 @@ public class AuthService {
             throw new RuntimeException(err);
         }
     }
-
 
 
 }

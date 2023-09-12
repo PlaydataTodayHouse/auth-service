@@ -1,6 +1,8 @@
 package com.example.auth.config;
 
+import com.example.auth.domain.entity.RefreshToken;
 import com.example.auth.domain.entity.User;
+import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +27,67 @@ public class JwtService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+
+    public String refreshToken(String refreshToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secret.getBytes())
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+
+            String userId = claims.getSubject();
+            User user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+            RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
+                    .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+            if (storedToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Refresh token is expired");
+            }
+
+            return makeAccessToken(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while refreshing token");
+        }
+    }
+
+
+    // refresh 토큰 유효시간 3일
+    public String makeRefreshToken(User user) {
+        Date expiryDate = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 3));
+        return Jwts.builder()
+                .setSubject(user.getId().toString())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS256, secret.getBytes())
+                .compact();
+    }
+
+    public void saveRefreshToken(User user, String refreshToken) {
+        RefreshToken newToken = new RefreshToken();
+        newToken.setUserId(Integer.parseInt(user.getUserId()));
+        newToken.setToken(refreshToken);
+        newToken.setExpiryDate(getRefreshTokenExpiryDate(refreshToken));
+        refreshTokenRepository.save(newToken);
+    }
+
+    public LocalDateTime getRefreshTokenExpiryDate(String refreshToken) {
+        Claims body = Jwts.parserBuilder()
+                .setSigningKey(secret.getBytes())
+                .build()
+                .parseClaimsJws(refreshToken)
+                .getBody();
+        return body.getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    public void invalidateRefreshToken(String refreshToken) {
+        refreshTokenRepository.deleteByToken(refreshToken);
+    }
 
 
     //access 토큰 유효시간 20분
@@ -38,26 +103,6 @@ public class JwtService {
                 .compact();
     }
 
-    // refresh 토큰 유효시간 3일
-    public String makeRefreshToken(User user) {
-        Date expiryDate = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 3));
-        return Jwts.builder()
-                .setSubject(user.getId().toString())
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS256, secret.getBytes())
-                .compact();
-    }
-
-
-    // 수정 예정
-    public Date getRefreshTokenExpiryDate(String refreshToken) {
-        Claims body = Jwts.parserBuilder()
-                .setSigningKey(secret.getBytes())
-                .build()
-                .parseClaimsJws(refreshToken)
-                .getBody();
-        return body.getExpiration();
-    }
 
     public TokenInfo parseAccessToken(String token) {
         Claims body = (Claims) Jwts.parserBuilder()
@@ -84,4 +129,5 @@ public class JwtService {
                 .role(user.getRole().name())
                 .build();
     }
+
 }
