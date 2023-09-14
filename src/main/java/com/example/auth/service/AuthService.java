@@ -10,7 +10,6 @@ import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.domain.response.UserResponse;
 import com.example.auth.exception.InvalidPasswordException;
 import com.example.auth.exception.UserNotFoundException;
-import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
