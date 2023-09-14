@@ -1,8 +1,5 @@
 package com.example.auth.service;
 
-
-import com.example.auth.client.request.CustomerRequest;
-import com.example.auth.client.request.OwnerRequest;
 import com.example.auth.config.JwtService;
 import com.example.auth.domain.entity.RefreshToken;
 import com.example.auth.domain.entity.Role;
@@ -22,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -31,9 +27,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-//    private final OwnerClient ownerClient;
-//    private final CustomerClient customerClient;
-    private final RefreshTokenRepository refreshTokenRepository;
 
 
 
@@ -49,23 +42,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.valueOf(request.getRole()))
                 .build();
-
-        User savedUser = userRepository.save(user);
-
-        // 역할에 따라 서비스 호출
-//        if (savedUser.getRole() == Role.OWNER) {
-//            OwnerRequest ownerRequest = new OwnerRequest(
-//                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
-//                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
-//            ResponseEntity<Void> response = ownerClient.saveOwner(ownerRequest);
-//            checkServiceResponse(savedUser.getRole(), response);
-//        } else if (savedUser.getRole() == Role.CUSTOMER) {
-//            CustomerRequest customerRequest = new CustomerRequest(
-//                    savedUser.getId(), savedUser.getName(), savedUser.getPhoneNumber(),
-//                    savedUser.getUserId(), savedUser.getEmail(), savedUser.getBirth());
-//            ResponseEntity<Void> response = customerClient.saveCustomer(customerRequest);
-//            checkServiceResponse(savedUser.getRole(), response);
-//        }
+        userRepository.save(user);
     }
 
     public LoginResponse login(LoginRequest request) {
