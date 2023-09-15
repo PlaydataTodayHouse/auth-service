@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Table(name = "users")
 @Entity @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder @Getter
+@Builder @Getter @Setter
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -22,6 +22,12 @@ public class User {
     private LocalDate birth;
     private String profileImage;
 
+    private String sellerName;
+    @Column(unique = true)
+    private String sellerNumber;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
+
 }

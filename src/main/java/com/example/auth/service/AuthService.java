@@ -1,15 +1,18 @@
 package com.example.auth.service;
 
 import com.example.auth.config.JwtService;
+import com.example.auth.domain.entity.Promotion;
 import com.example.auth.domain.entity.RefreshToken;
 import com.example.auth.domain.entity.Role;
 import com.example.auth.domain.entity.User;
 import com.example.auth.domain.request.LoginRequest;
+import com.example.auth.domain.request.PromotionRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.domain.response.UserResponse;
 import com.example.auth.exception.InvalidPasswordException;
 import com.example.auth.exception.UserNotFoundException;
+import com.example.auth.repository.PromotionRepository;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,23 +30,25 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final PromotionRepository promotionRepository;
 
 
 
     @Transactional
     public void signUp(SignupRequest request) {
         User user = User.builder()
-                .userId((request.getUserId()))
+                .userId(request.getUserId())
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
                 .birth(request.getBirth())
                 .profileImage(request.getProfileImage())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.valueOf(request.getRole()))
+                .role(Role.CUSTOMER)
                 .build();
         userRepository.save(user);
     }
+
 
     public LoginResponse login(LoginRequest request) {
         Optional<User> optionalUser = userRepository.findByUserId(request.getUserId());
@@ -85,6 +91,46 @@ public class AuthService {
                 .build();
     }
 
+
+
+    @Transactional
+    public void requestPromotion(PromotionRequest request) {
+        User user = userRepository.findByUserId(request.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("없는 유저입니다"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidPasswordException("비밀번호가 올바르지 않습니다");
+        }
+
+        Promotion promotion = Promotion.builder()
+                .user(user)
+                .sellerName(request.getSellerName())
+                .sellerNumber(request.getSellerNumber())
+                .approved(false)
+                .build();
+        promotionRepository.save(promotion);
+    }
+
+    @Transactional
+    public void approvePromotion(Long requestId) {
+        Promotion promotion = promotionRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("요청된 승급 신청이 없습니다"));
+
+        User user = promotion.getUser();
+        user.setRole(Role.SELLER);
+        user.setSellerName(promotion.getSellerName());
+        user.setSellerNumber(promotion.getSellerNumber());
+
+        promotion.setApproved(true);
+        userRepository.save(user);
+        promotionRepository.save(promotion);
+    }
+
+    public List<Promotion> getAllPromotionRequests() {
+        return promotionRepository.findAll();
+    }
+
+
     // 서비스 호출 응답 검사 메서드
     private void checkServiceResponse(Role role, ResponseEntity<Void> response) {
         if (response.getStatusCode() != HttpStatus.CREATED) {
@@ -92,6 +138,4 @@ public class AuthService {
             throw new RuntimeException(err);
         }
     }
-
-
 }

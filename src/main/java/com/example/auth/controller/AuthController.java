@@ -2,15 +2,20 @@ package com.example.auth.controller;
 
 import com.example.auth.config.JwtService;
 import com.example.auth.config.TokenInfo;
+import com.example.auth.domain.entity.Promotion;
 import com.example.auth.domain.request.LoginRequest;
+import com.example.auth.domain.request.PromotionRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
 import com.example.auth.domain.response.UserResponse;
 import com.example.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
-
-
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request){
@@ -52,4 +55,23 @@ public class AuthController {
         return ResponseEntity.ok().body(newAccessToken);
     }
 
+    @PostMapping("/promotion")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public void requestPromotion(@RequestBody PromotionRequest request) {
+        authService.requestPromotion(request);
+    }
+
+    @PostMapping("/promotion/{requestId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void approvePromotion(@PathVariable Long requestId) {
+        authService.approvePromotion(requestId);
+    }
+
+    @GetMapping("/promotionList")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Promotion> getAllPromotionRequests() {
+        return authService.getAllPromotionRequests();
+    }
+
 }
+

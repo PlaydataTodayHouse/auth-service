@@ -1,8 +1,5 @@
 package com.example.auth.domain.request;
 
-import com.example.auth.domain.entity.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +17,4 @@ public class SignupRequest {
     private String email;
     private LocalDate birth;
     private String profileImage;
-    private String role;
 }
