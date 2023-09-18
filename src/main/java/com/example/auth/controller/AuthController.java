@@ -62,13 +62,11 @@ public class AuthController {
     }
 
     @PostMapping("/promotion/{requestId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public void approvePromotion(@PathVariable Long requestId) {
         authService.approvePromotion(requestId);
     }
 
     @GetMapping("/promotionList")
-    @PreAuthorize("hasRole('ADMIN')")
     public List<Promotion> getAllPromotionRequests() {
         return authService.getAllPromotionRequests();
     }
