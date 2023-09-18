@@ -9,6 +9,7 @@ import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.PromotionRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
+import com.example.auth.domain.response.PromotionResponse;
 import com.example.auth.domain.response.UserResponse;
 import com.example.auth.exception.InvalidPasswordException;
 import com.example.auth.exception.UserNotFoundException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -126,8 +128,15 @@ public class AuthService {
         promotionRepository.save(promotion);
     }
 
-    public List<Promotion> getAllPromotionRequests() {
-        return promotionRepository.findAll();
+    public List<PromotionResponse> getAllPromotionRequests() {
+        List<Promotion> promotions = promotionRepository.findAll();
+        return promotions.stream()
+                .map(promotion -> new PromotionResponse(
+                        promotion.getId(),
+                        promotion.getUser().getUserId(), // Assuming User has getUserId() method.
+                        promotion.getSellerName(),
+                        promotion.getSellerNumber()))
+                .collect(Collectors.toList());
     }
 
 

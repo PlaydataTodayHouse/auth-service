@@ -12,6 +12,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -19,10 +22,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
-
-
-
-
 
     @Bean
     public SecurityFilterChain
@@ -38,7 +37,9 @@ public class SecurityConfig {
         security.authorizeHttpRequests(req ->
                 req.requestMatchers(
                         AntPathRequestMatcher.antMatcher("/api/v1/auth/login")
-                        ,AntPathRequestMatcher.antMatcher("/api/v1/auth/signup")
+                       ,AntPathRequestMatcher.antMatcher("/api/v1/auth/signup")
+                       ,AntPathRequestMatcher.antMatcher("/api/v1/auth/refresh")
+                       ,AntPathRequestMatcher.antMatcher("/api/v1/auth/findUser/**")
                 )
                         .permitAll()
                         .anyRequest().authenticated()
@@ -46,6 +47,4 @@ public class SecurityConfig {
         return security.build();
 
     }
-
-
 }

@@ -2,11 +2,11 @@ package com.example.auth.controller;
 
 import com.example.auth.config.JwtService;
 import com.example.auth.config.TokenInfo;
-import com.example.auth.domain.entity.Promotion;
 import com.example.auth.domain.request.LoginRequest;
 import com.example.auth.domain.request.PromotionRequest;
 import com.example.auth.domain.request.SignupRequest;
 import com.example.auth.domain.response.LoginResponse;
+import com.example.auth.domain.response.PromotionResponse;
 import com.example.auth.domain.response.UserResponse;
 import com.example.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +44,8 @@ public class AuthController {
         return tokenInfo;
     }
 
-    @GetMapping("/{userId}")
-    public UserResponse getUserByUserId(@PathVariable String userId) {
+    @GetMapping("/findUser/{userId}")
+    public UserResponse findUserByUserId(@PathVariable String userId) {
         return authService.findUserByUserId(userId);
     }
 
@@ -62,12 +62,14 @@ public class AuthController {
     }
 
     @PostMapping("/promotion/{requestId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void approvePromotion(@PathVariable Long requestId) {
         authService.approvePromotion(requestId);
     }
 
     @GetMapping("/promotionList")
-    public List<Promotion> getAllPromotionRequests() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<PromotionResponse> getAllPromotionRequests() {
         return authService.getAllPromotionRequests();
     }
 
