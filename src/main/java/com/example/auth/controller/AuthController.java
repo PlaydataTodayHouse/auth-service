@@ -51,7 +51,7 @@ public class AuthController {
 
     @GetMapping("/findUser/{userUUId}")
     public UserResponse findUserByUserUUId(@PathVariable String userUUId) {
-        return authService.findUserByUserId(userUUId);
+        return authService.findUserByUserUUId(userUUId);
     }
 
     @PostMapping("/refresh")
