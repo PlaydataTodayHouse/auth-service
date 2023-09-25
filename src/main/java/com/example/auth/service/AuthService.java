@@ -94,6 +94,22 @@ public class AuthService {
     }
 
 
+    public UserResponse findUserByUserUUId(String userUUId) {
+        User user = userRepository.findByUserUUId(userUUId)
+                .orElseThrow(() -> new IllegalArgumentException("USER NOT FOUND FOR USERID: " + userUUId));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .email(user.getEmail())
+                .birth(user.getBirth())
+                .profileImage(user.getProfileImage())
+                .role(user.getRole().name())
+                .build();
+    }
+
 
     @Transactional
     public void requestPromotion(PromotionRequest request) {

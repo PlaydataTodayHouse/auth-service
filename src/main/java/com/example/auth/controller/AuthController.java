@@ -49,6 +49,11 @@ public class AuthController {
         return authService.findUserByUserId(userId);
     }
 
+    @GetMapping("/findUser/{userUUId}")
+    public UserResponse findUserByUserUUId(@PathVariable String userUUId) {
+        return authService.findUserByUserId(userUUId);
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
         String newAccessToken = jwtService.generateNewAccessToken(refreshToken);
